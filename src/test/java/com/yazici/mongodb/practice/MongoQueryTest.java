@@ -31,6 +31,8 @@ public class MongoQueryTest {
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "users";
     public static final int SINGLE = 1;
+    public static final Document QUERY_FOR_USER1 = new Document("name", "john");
+
     private static Injector injector;
     private static MongoClient mongoClient;
     private static MongoCollection<Document> usersCollection;
@@ -119,5 +121,12 @@ public class MongoQueryTest {
 
         assertThat("first user should have been included", users, hasItems(testUser1));
         assertThat("test user 2 should have been excluded", users, is(not(hasItems(testUser2))));
+    }
+
+    @Test
+    public void shouldFilterByName() throws Exception {
+        final Document actualUser1 = usersCollection.find(QUERY_FOR_USER1).first();
+
+        assertThat("filter query by name should have returned the first user", actualUser1, is(equalTo(testUser1)));
     }
 }
