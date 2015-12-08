@@ -17,6 +17,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -32,24 +33,26 @@ public class MongoInsertTest {
     public static final String COLLECTION_NAME = "users";
     private static Injector injector;
     private static MongoClient mongoClient;
+    private static MongoCollection<Document> usersCollection;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         injector = Guice.createInjector(new ConfigModule(), new MongoClientModule());
         mongoClient = injector.getInstance(MongoClient.class);
+        final MongoDatabase kytestdb = mongoClient.getDatabase("kytestdb");
+        usersCollection = kytestdb.getCollection("users");
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
         mongoClient.close();
         injector = null;
+        usersCollection.deleteMany(new Document("name", "romano"));
     }
 
 
     @Test
     public void shouldInsertASingleDocument() throws Exception {
-        final MongoDatabase kytestdb = mongoClient.getDatabase("kytestdb");
-        final MongoCollection<Document> usersCollection = kytestdb.getCollection("users");
 
         final Document user = new Document("name", "john")
                 .append("age", 33)
@@ -60,9 +63,6 @@ public class MongoInsertTest {
 
     @Test
     public void shouldInsertAnEmbeddedDocument() throws Exception {
-        final MongoDatabase kytestdb = mongoClient.getDatabase("kytestdb");
-        final MongoCollection<Document> usersCollection = kytestdb.getCollection("users");
-
         final Document user = new Document("name", "alberto")
                 .append("age", 52)
                 .append("info",
@@ -74,9 +74,6 @@ public class MongoInsertTest {
 
     @Test
     public void shouldInsertAnArrayOfData() throws Exception {
-        final MongoDatabase kytestdb = mongoClient.getDatabase(DATABASE_NAME);
-        final MongoCollection<Document> usersCollection = kytestdb.getCollection(COLLECTION_NAME);
-
         final List<Document> kids = Arrays.asList(
                 new Document("name", "hanna"),
                 new Document("name", "emma")
@@ -90,5 +87,17 @@ public class MongoInsertTest {
                                 .append("phone", "9283742"));
 
         usersCollection.insertOne(user);
+    }
+
+    @Test
+    public void shouldInsertWithId() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+
+        final Document user = new Document("_id", uuid.toString().replace("-",""))
+                .append("name", "romano")
+                .append("age", 28);
+
+        usersCollection.insertOne(user);
+
     }
 }
