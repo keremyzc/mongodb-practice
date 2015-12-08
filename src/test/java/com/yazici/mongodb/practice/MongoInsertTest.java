@@ -39,8 +39,8 @@ public class MongoInsertTest {
     public static void setUpClass() throws Exception {
         injector = Guice.createInjector(new ConfigModule(), new MongoClientModule());
         mongoClient = injector.getInstance(MongoClient.class);
-        final MongoDatabase kytestdb = mongoClient.getDatabase("kytestdb");
-        usersCollection = kytestdb.getCollection("users");
+        final MongoDatabase kytestdb = mongoClient.getDatabase(DATABASE_NAME);
+        usersCollection = kytestdb.getCollection(COLLECTION_NAME);
     }
 
     @AfterClass
