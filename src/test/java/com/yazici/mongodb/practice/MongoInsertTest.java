@@ -14,6 +14,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -73,8 +77,14 @@ public class MongoInsertTest {
         final MongoDatabase kytestdb = mongoClient.getDatabase(DATABASE_NAME);
         final MongoCollection<Document> usersCollection = kytestdb.getCollection(COLLECTION_NAME);
 
+        final List<Document> kids = Arrays.asList(
+                new Document("name", "hanna"),
+                new Document("name", "emma")
+        );
+
         final Document user = new Document("name", "alberto")
                 .append("age", 52)
+                .append("kids", kids)
                 .append("info",
                         new Document("email", "alberto@gmail.com")
                                 .append("phone", "9283742"));
