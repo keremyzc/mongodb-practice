@@ -12,10 +12,14 @@ import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
 import org.junit.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -26,6 +30,7 @@ public class MongoQueryTest {
 
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "users";
+    public static final int SINGLE = 1;
     private static Injector injector;
     private static MongoClient mongoClient;
     private static MongoCollection<Document> usersCollection;
@@ -56,7 +61,7 @@ public class MongoQueryTest {
     }
 
     @After
-    public void deleteTestData(){
+    public void deleteTestData() {
         usersCollection.deleteOne(new Document("name", "john"));
         usersCollection.deleteOne(new Document("name", "mario"));
     }
@@ -70,11 +75,49 @@ public class MongoQueryTest {
 
 
     @Test
-    public void shouldInsertASingleDocument() throws Exception {
+    public void shouldFindAllDocuments() throws Exception {
         final FindIterable<Document> cursor = usersCollection.find();
         final List<Document> docs = FluentIterable.from(cursor).toList();
 
-        assertThat(docs, hasItems(testUser1, testUser2));
+        assertThat("test1 and test2 data couldn't be found, mystery?", docs, hasItems(testUser1, testUser2));
     }
 
+    @Test
+    public void shouldGetTheCount() throws Exception {
+        final long expectedCount = 2L;
+        final long actualCount = usersCollection.count();
+
+        assertThat("there should have been two test data", actualCount, is(equalTo(expectedCount)));
+    }
+
+    /**
+     * When find is executed and a DBCursor is executed you have a pointer to a database document.
+     * This means that the documents are fetched in the memory as you call next() method on the DBCursor.
+     * <p>
+     * but we can eagerly load all the data into the memory
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldEagerlyFetchData() throws Exception {
+        final List<Document> users = usersCollection.find().into(new ArrayList<>());
+
+        assertThat(users, hasItems(testUser1, testUser2));
+    }
+
+    @Test
+    public void shouldEagerlyFetchDataAndSkipFirst() throws Exception {
+        final List<Document> users = usersCollection.find().skip(SINGLE).into(new ArrayList<>());
+
+        assertThat("first user should have been skipped", users, is(not(hasItems(testUser1))));
+        assertThat("test user 2 couldn't be found in the db", users, hasItems(testUser2));
+    }
+
+    @Test
+    public void shouldEagerlyFetchDataAndLimitResult() throws Exception {
+        final List<Document> users = usersCollection.find().limit(SINGLE).into(new ArrayList<>());
+
+        assertThat("first user should have been included", users, hasItems(testUser1));
+        assertThat("test user 2 should have been excluded", users, is(not(hasItems(testUser2))));
+    }
 }
