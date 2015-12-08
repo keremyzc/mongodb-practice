@@ -92,6 +92,12 @@ public class MongoInsertTest {
         usersCollection.insertOne(user);
     }
 
+    /**
+     * from the book :: Be careful when using your own IDs!
+     * When providing your own keys, it is entirely your responsibility to care for duplicate key issues. Generally speaking, MongoDB documents
+     * can share the same keys; that's not true for the _id key, resulting in an exception if you try to insert two documents with the same _id:
+     * @throws com.mongodb.MongoException$DuplicateKey
+     */
     @Test
     public void shouldInsertWithId() throws Exception {
         final UUID uuid = UUID.randomUUID();
