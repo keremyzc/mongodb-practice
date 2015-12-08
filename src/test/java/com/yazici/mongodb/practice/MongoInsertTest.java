@@ -45,9 +45,12 @@ public class MongoInsertTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        usersCollection.deleteMany(new Document("name", "romano"));
+        usersCollection.deleteMany(new Document("name", "john"));
+        usersCollection.deleteMany(new Document("name", "alberto"));
+
         mongoClient.close();
         injector = null;
-        usersCollection.deleteMany(new Document("name", "romano"));
     }
 
 
