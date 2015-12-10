@@ -7,6 +7,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
@@ -31,6 +32,7 @@ public class MongoUpdateTest {
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "users";
     public static final int SINGLE = 1;
+    public static final long SINGLEL = 1L;
     public static final Document QUERY_FOR_USER1 = new Document("name", "john");
 
     private static Injector injector;
@@ -76,8 +78,29 @@ public class MongoUpdateTest {
     }
 
 
+    /**
+     * from book: Please note that the DBCollection class overloads the method update
+     * with update (DBObject q, DBObject o, boolean upsert, boolean multi).
+     * The  rst parameter (upsert) determines whether the database should create the element if it does not exist.
+     * The second one (multi) causes the update to be applied to all matching objects.
+     *
+     * @throws Exception
+     */
     @Test
-    public void shouldFindAllDocuments() throws Exception {
+    public void shouldUpdateDocument() throws Exception {
+        final Document searchQuery = new Document("name", "john");
+        final int newAge = 34;
+        final Document updateQuery = new Document("$set", new Document("age", newAge));
+
+        final UpdateResult updateResult = usersCollection.updateOne(searchQuery, updateQuery);
+
+        assertThat("only a single document should have matched", updateResult.getMatchedCount(), is(equalTo(SINGLEL)));
+        assertThat("only a single document should have been updated", updateResult.getModifiedCount(), is(equalTo(SINGLEL)));
+        assertThat("the update query shouldn't have created a record", updateResult.getUpsertedId(), is(equalTo(null)));
+
+        final Document updatedUser = usersCollection.find(searchQuery).first();
+        assertThat("update query should have updated the age to: " + newAge, updatedUser.get("age"), is(equalTo(newAge)));
+
     }
 
 }
