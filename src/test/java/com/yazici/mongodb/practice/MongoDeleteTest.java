@@ -5,9 +5,7 @@ import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
@@ -31,6 +29,8 @@ public class MongoDeleteTest {
     public static final int SINGLE = 1;
     public static final long SINGLEL = 1L;
     public static final Document QUERY_FOR_USER1 = new Document("name", "john");
+    public static final long MULTIPLEL = 2L;
+    public static final long EMPTYL = 0L;
 
     private static Injector injector;
     private static MongoClient mongoClient;
@@ -90,10 +90,21 @@ public class MongoDeleteTest {
         final Document searchQuery = new Document("name", "john");
 
         final DeleteResult result = usersCollection.deleteOne(searchQuery);
-        assertThat("testUser1 should have been deleted and delete result should have count one", result.getDeletedCount(), is(equalTo(SINGLEL)));
+        assertThat("testUser1 should have been deleted and delete result should have count " + SINGLEL, result.getDeletedCount(), is(equalTo(SINGLEL)));
 
         final Document deletedUser = usersCollection.find(searchQuery).first();
         assertThat("test user 1 shouldnt have been found", deletedUser, is(nullValue()));
+    }
+
+    @Test
+    public void shouldDeleteManyDocumentWithAndOp() throws Exception {
+        final Document searchQuery = new Document("name", new Document("$in", Arrays.asList("john", "mario")));
+
+        final DeleteResult result = usersCollection.deleteMany(searchQuery);
+        assertThat("testUser1 and testUser2 should have been deleted and delete result should have count " + MULTIPLEL, result.getDeletedCount(), is(equalTo(MULTIPLEL)));
+
+        final long numberOfUsers = usersCollection.count();
+        assertThat("test user 1 and 2 shouldnt have been found", numberOfUsers, is(equalTo(EMPTYL)));
     }
 
 }
