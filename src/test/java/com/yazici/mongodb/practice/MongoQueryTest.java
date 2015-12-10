@@ -139,8 +139,17 @@ public class MongoQueryTest {
 
     @Test
     public void shouldFilterByNameNotEqualTo() throws Exception {
-        final List<Document> users = usersCollection.find(new Document("name", new Document("$ne", "alberto"))).into(new ArrayList<>());
+        final List<Document> users = usersCollection.find(new Document("name", new Document("$ne", "mario"))).into(new ArrayList<>());
 
         assertThat("test user 1 should be the only user whos name isnt alberto", users, hasItems(testUser1));
+    }
+
+    @Test
+    public void shouldFilterByAgeAndName() throws Exception {
+        final Document filter = new Document("name", new Document("$ne", "mario"))
+                .append("age", new Document("$lt", 40));
+        final List<Document> users = usersCollection.find(filter).into(new ArrayList<>());
+
+        assertThat("test user 1 should be the only user whos name isnt alberto and age less than 40", users, hasItems(testUser1));
     }
 }
