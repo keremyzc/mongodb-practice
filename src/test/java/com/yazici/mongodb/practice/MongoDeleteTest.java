@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.result.UpdateResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -71,5 +73,15 @@ public class MongoDeleteTest {
         injector = null;
     }
 
+    @Test
+    public void shouldDeleteDocument() throws Exception {
+        final Document searchQuery = new Document("name", "john");
+
+        final Document actualUser1 = usersCollection.findOneAndDelete(searchQuery);
+        assertThat("testUser1 should have been deleted and returned", actualUser1, is(equalTo(testUser1)));
+
+        final Document updatedUser = usersCollection.find(searchQuery).first();
+        assertThat("update query should have updated the age to: ", updatedUser, is(nullValue()));
+    }
 
 }
