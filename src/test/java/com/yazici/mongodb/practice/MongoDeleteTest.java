@@ -6,6 +6,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
@@ -74,14 +75,25 @@ public class MongoDeleteTest {
     }
 
     @Test
-    public void shouldDeleteDocument() throws Exception {
+    public void shouldFindAndDeleteDocument() throws Exception {
         final Document searchQuery = new Document("name", "john");
 
         final Document actualUser1 = usersCollection.findOneAndDelete(searchQuery);
         assertThat("testUser1 should have been deleted and returned", actualUser1, is(equalTo(testUser1)));
 
-        final Document updatedUser = usersCollection.find(searchQuery).first();
-        assertThat("update query should have updated the age to: ", updatedUser, is(nullValue()));
+        final Document deletedUser = usersCollection.find(searchQuery).first();
+        assertThat("test user 1 shouldnt have been found", deletedUser, is(nullValue()));
+    }
+
+    @Test
+    public void shouldDeleteDocument() throws Exception {
+        final Document searchQuery = new Document("name", "john");
+
+        final DeleteResult result = usersCollection.deleteOne(searchQuery);
+        assertThat("testUser1 should have been deleted and delete result should have count one", result.getDeletedCount(), is(equalTo(SINGLEL)));
+
+        final Document deletedUser = usersCollection.find(searchQuery).first();
+        assertThat("test user 1 shouldnt have been found", deletedUser, is(nullValue()));
     }
 
 }
