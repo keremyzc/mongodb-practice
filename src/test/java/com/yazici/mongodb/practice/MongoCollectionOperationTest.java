@@ -26,6 +26,7 @@ public class MongoCollectionOperationTest {
 
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "testCollection";
+    private static final long SINGLEL = 1L;
 
     private static Injector injector;
     private static MongoClient mongoClient;
@@ -59,4 +60,18 @@ public class MongoCollectionOperationTest {
         injector = null;
     }
 
+    @Test
+    public void shouldCreateANewCollectionByInsert() throws Exception {
+        final MongoCollection<Document> collection = kytestdb.getCollection(COLLECTION_NAME);
+
+        collection.insertOne(testUser1);
+
+        final long numberOfUesrs = collection.count();
+        assertThat("should contain only a single user", numberOfUesrs, is(equalTo(SINGLEL)));
+
+        final Document actualUser = collection.find().first();
+        assertThat("test user 1 should have been inserted", actualUser, is(equalTo(testUser1)));
+
+
+    }
 }
