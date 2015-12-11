@@ -10,12 +10,14 @@ import com.mongodb.client.MongoDatabase;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -132,22 +134,21 @@ public class MongoQueryTest {
 
     @Test
     public void shouldFilterByAgeGreaterThan() throws Exception {
-        final List<Document> users = usersCollection.find(new Document("age", new Document("$gt", 35))).into(new ArrayList<>());
+        final List<Document> users = usersCollection.find(gt("age", 35)).into(new ArrayList<>());
 
         assertThat("test user 2 should be the only user whos age is greater than 35", users, hasItems(testUser2));
     }
 
     @Test
     public void shouldFilterByNameNotEqualTo() throws Exception {
-        final List<Document> users = usersCollection.find(new Document("name", new Document("$ne", "mario"))).into(new ArrayList<>());
+        final List<Document> users = usersCollection.find(ne("name", "mario")).into(new ArrayList<>());
 
         assertThat("test user 1 should be the only user whos name isnt alberto", users, hasItems(testUser1));
     }
 
     @Test
     public void shouldFilterByAgeAndName() throws Exception {
-        final Document filter = new Document("name", new Document("$ne", "mario"))
-                .append("age", new Document("$lt", 40));
+        final Bson filter = and(ne("name", "mario"), lt("age", 40));
         final List<Document> users = usersCollection.find(filter).into(new ArrayList<>());
 
         assertThat("test user 1 should be the only user whos name isnt alberto and age less than 40", users, hasItems(testUser1));
