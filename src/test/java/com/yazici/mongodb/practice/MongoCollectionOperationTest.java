@@ -3,8 +3,10 @@ package com.yazici.mongodb.practice;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
+import com.mongodb.client.ListCollectionsIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
@@ -12,9 +14,12 @@ import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
 import org.junit.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
@@ -27,6 +32,7 @@ public class MongoCollectionOperationTest {
 
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "testCollection";
+    public static final String COLLECTION_NAME2 = "testCollection2";
     private static final long SINGLEL = 1L;
     public static final int MB = 1024 * 1024;
 
@@ -53,8 +59,8 @@ public class MongoCollectionOperationTest {
 
     @After
     public void deleteTestData() {
-        final MongoCollection<Document> collection = kytestdb.getCollection(COLLECTION_NAME);
-        collection.drop();
+        kytestdb.getCollection(COLLECTION_NAME).drop();
+        kytestdb.getCollection(COLLECTION_NAME2).drop();
     }
 
 
@@ -77,7 +83,6 @@ public class MongoCollectionOperationTest {
         assertThat("test user 1 should have been inserted", actualUser, is(equalTo(testUser1)));
 
 
-        collection.drop();
     }
 
     /**
@@ -93,6 +98,17 @@ public class MongoCollectionOperationTest {
 
         kytestdb.createCollection(COLLECTION_NAME, options);
         final MongoCollection<Document> collection = kytestdb.getCollection(COLLECTION_NAME);
-        collection.drop();
+    }
+
+    @Test
+    public void shouldListCollection() {
+        kytestdb.createCollection(COLLECTION_NAME);
+        kytestdb.createCollection(COLLECTION_NAME2);
+        final List<String> actualCollectionNames = kytestdb.listCollectionNames().into(new ArrayList<>());
+
+        assertThat("returned list should contain " + COLLECTION_NAME + " and " + COLLECTION_NAME2,
+                actualCollectionNames, hasItems(COLLECTION_NAME, COLLECTION_NAME2));
+
+
     }
 }
