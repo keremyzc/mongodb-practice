@@ -49,6 +49,8 @@ public class MongoInsertTest {
         usersCollection.deleteMany(new Document("name", "john"));
         usersCollection.deleteMany(new Document("name", "alberto"));
 
+        usersCollection.drop();
+
         mongoClient.close();
         injector = null;
     }
@@ -90,6 +92,24 @@ public class MongoInsertTest {
                                 .append("phone", "9283742"));
 
         usersCollection.insertOne(user);
+    }
+
+    @Test
+    public void shouldInsertMultipleDocument() throws Exception {
+        final List<Document> users = new ArrayList<>(3);
+
+        final Document alberto = new Document("name", "alberto")
+                .append("age", 52);
+        final Document john = new Document("name", "john")
+                .append("age", 16);
+        final Document tim = new Document("name", "tim")
+                .append("age", 22);
+
+        users.add(alberto);
+        users.add(john);
+        users.add(tim);
+
+        usersCollection.insertMany(users);
     }
 
     /**
