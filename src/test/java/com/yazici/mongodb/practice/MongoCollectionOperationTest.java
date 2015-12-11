@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
@@ -27,6 +28,7 @@ public class MongoCollectionOperationTest {
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "testCollection";
     private static final long SINGLEL = 1L;
+    public static final int MB = 1024 * 1024;
 
     private static Injector injector;
     private static MongoClient mongoClient;
@@ -51,6 +53,8 @@ public class MongoCollectionOperationTest {
 
     @After
     public void deleteTestData() {
+        final MongoCollection<Document> collection = kytestdb.getCollection(COLLECTION_NAME);
+        collection.drop();
     }
 
 
@@ -73,5 +77,22 @@ public class MongoCollectionOperationTest {
         assertThat("test user 1 should have been inserted", actualUser, is(equalTo(testUser1)));
 
 
+        collection.drop();
+    }
+
+    /**
+     * A Capped collection is a fixed-size collection, which supports high-throughput insert/retrieve operations based on insertion order.
+     * A capped collection acts much the same as a circular buffer.
+     * As a collection fills out its allocated space, it overwrites the oldest documents to make room.
+     */
+    @Test
+    public void shouldCreateACappedCollection() {
+        final CreateCollectionOptions options = new CreateCollectionOptions()
+                .capped(true)
+                .sizeInBytes(10 * MB);
+
+        kytestdb.createCollection(COLLECTION_NAME, options);
+        final MongoCollection<Document> collection = kytestdb.getCollection(COLLECTION_NAME);
+        collection.drop();
     }
 }
