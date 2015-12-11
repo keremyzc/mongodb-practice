@@ -9,10 +9,12 @@ import com.mongodb.client.result.DeleteResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.*;
 
 import java.util.Arrays;
 
+import static com.mongodb.client.model.Filters.in;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -98,7 +100,7 @@ public class MongoDeleteTest {
 
     @Test
     public void shouldDeleteManyDocumentWithAndOp() throws Exception {
-        final Document searchQuery = new Document("name", new Document("$in", Arrays.asList("john", "mario")));
+        final Bson searchQuery = in("name", Arrays.asList("john", "mario"));
 
         final DeleteResult result = usersCollection.deleteMany(searchQuery);
         assertThat("testUser1 and testUser2 should have been deleted and delete result should have count " + MULTIPLEL, result.getDeletedCount(), is(equalTo(MULTIPLEL)));

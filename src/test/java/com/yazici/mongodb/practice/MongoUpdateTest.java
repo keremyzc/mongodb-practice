@@ -1,26 +1,22 @@
 package com.yazici.mongodb.practice;
 
-import com.google.common.collect.FluentIterable;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import static com.mongodb.client.model.Updates.set;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -31,9 +27,7 @@ public class MongoUpdateTest {
 
     public static final String DATABASE_NAME = "kytestdb";
     public static final String COLLECTION_NAME = "users";
-    public static final int SINGLE = 1;
     public static final long SINGLEL = 1L;
-    public static final Document QUERY_FOR_USER1 = new Document("name", "john");
 
     private static Injector injector;
     private static MongoClient mongoClient;
@@ -90,7 +84,7 @@ public class MongoUpdateTest {
     public void shouldUpdateDocument() throws Exception {
         final Document searchQuery = new Document("name", "john");
         final int newAge = 34;
-        final Document updateQuery = new Document("$set", new Document("age", newAge));
+        final Bson updateQuery = set("age", newAge);
 
         final UpdateResult updateResult = usersCollection.updateOne(searchQuery, updateQuery);
 
