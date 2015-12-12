@@ -1,6 +1,7 @@
 package com.yazici.mongodb.practice.bind;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -24,7 +25,14 @@ public class MongoClientModule extends AbstractModule {
 
     @Provides
     MongoClient provideMongoClient(@Named("com.yazici.mongo.host") String mongoHost,
-                                   @Named("com.yazici.mongo.port") int mongoPort) {
+                                   @Named("com.yazici.mongo.port") int mongoPort,
+                                   MongoClientOptions options) {
+
+        return new MongoClient(String.format("%s:%d", mongoHost, mongoPort), options);
+    }
+
+    @Provides
+    MongoClientOptions provideMongoClient() {
 
         final CodecRegistry defaultCodecRegistry = MongoClient.getDefaultCodecRegistry();
         final Codec<Document> defaultDocumentCodec = defaultCodecRegistry.get(Document.class);
@@ -35,6 +43,8 @@ public class MongoClientModule extends AbstractModule {
         );
         final MongoClientOptions options = MongoClientOptions.builder().codecRegistry(codecRegistry)
                 .build();
-        return new MongoClient(String.format("%s:%d", mongoHost, mongoPort), options);
+        return options;
     }
+
+
 }
