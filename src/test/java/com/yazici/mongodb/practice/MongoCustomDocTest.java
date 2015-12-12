@@ -3,19 +3,13 @@ package com.yazici.mongodb.practice;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
-import com.yazici.mongodb.practice.domain.User;
-import com.yazici.mongodb.practice.domain.codec.UserCodec;
+import com.yazici.mongodb.practice.domain.UserDoc;
 import org.bson.Document;
-import org.bson.codecs.Codec;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -54,13 +48,13 @@ public class MongoCustomDocTest {
     @Test
     public void shouldInsertASingleDocumentWithCodec() throws Exception {
 
-        final User john = new User("john", 32);
+        final UserDoc john = new UserDoc("john", 32);
 
         usersCollection.insertOne(john);
 
-        final User actualUser = usersCollection.find(john, User.class).first();
+        final UserDoc actualUserDoc = usersCollection.find(john, UserDoc.class).first();
 
-        assertThat("it should have inserted a single user domain object " + john, actualUser, is(equalTo(john)));
+        assertThat("it should have inserted a single user domain object " + john, actualUserDoc, is(equalTo(john)));
     }
 
 }

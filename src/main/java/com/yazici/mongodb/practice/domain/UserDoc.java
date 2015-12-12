@@ -8,18 +8,18 @@ import org.bson.types.ObjectId;
 /**
  * Created by keremyzc on 12/12/2015.
  */
-public class User extends Document {
+public class UserDoc extends Document {
 
 
     public static final String NAME = "name";
     public static final String AGE = "age";
 
-    public User(String name, int age) {
+    public UserDoc(String name, int age) {
         append(NAME, name);
         append(AGE, age);
     }
 
-    public User(Document decode) {
+    public UserDoc(Document decode) {
        putAll(decode);
     }
 
@@ -50,7 +50,7 @@ public class User extends Document {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        User that = (User) o;
+        UserDoc that = (UserDoc) o;
         return getObjectId().equals(that.getObjectId()) &&
                 getAge() == that.getAge() &&
                 getName().equals(that.getName());

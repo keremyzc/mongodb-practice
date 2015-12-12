@@ -1,6 +1,6 @@
 package com.yazici.mongodb.practice.domain.codec;
 
-import com.yazici.mongodb.practice.domain.User;
+import com.yazici.mongodb.practice.domain.UserDoc;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.Document;
@@ -11,7 +11,7 @@ import org.bson.codecs.EncoderContext;
 /**
  * Created by keremyzc on 12/12/2015.
  */
-public class UserCodec implements Codec<User> {
+public class UserCodec implements Codec<UserDoc> {
 
     private final Codec<Document> documentCodec;
 
@@ -21,17 +21,17 @@ public class UserCodec implements Codec<User> {
 
 
     @Override
-    public User decode(BsonReader reader, DecoderContext decoderContext) {
-        return new User(documentCodec.decode(reader, decoderContext));
+    public UserDoc decode(BsonReader reader, DecoderContext decoderContext) {
+        return new UserDoc(documentCodec.decode(reader, decoderContext));
     }
 
     @Override
-    public void encode(BsonWriter writer, User value, EncoderContext encoderContext) {
+    public void encode(BsonWriter writer, UserDoc value, EncoderContext encoderContext) {
         documentCodec.encode(writer, value, encoderContext);
     }
 
     @Override
-    public Class<User> getEncoderClass() {
-        return User.class;
+    public Class<UserDoc> getEncoderClass() {
+        return UserDoc.class;
     }
 }
