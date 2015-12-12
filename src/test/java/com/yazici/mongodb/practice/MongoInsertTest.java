@@ -2,14 +2,13 @@ package com.yazici.mongodb.practice;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.yazici.mongodb.practice.bind.ConfigModule;
 import com.yazici.mongodb.practice.bind.MongoClientModule;
 import org.bson.Document;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,7 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.or;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -45,14 +48,18 @@ public class MongoInsertTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        usersCollection.deleteMany(new Document("name", "romano"));
-        usersCollection.deleteMany(new Document("name", "john"));
-        usersCollection.deleteMany(new Document("name", "alberto"));
 
         usersCollection.drop();
 
         mongoClient.close();
         injector = null;
+    }
+
+    @After
+    public void cleanUp() {
+        usersCollection.deleteMany(new Document("name", "romano"));
+        usersCollection.deleteMany(new Document("name", "john"));
+        usersCollection.deleteMany(new Document("name", "alberto"));
     }
 
 
@@ -64,6 +71,10 @@ public class MongoInsertTest {
                 .append("phone", "0983042");
 
         usersCollection.insertOne(user);
+
+        final Document actualUser = usersCollection.find(user).first();
+
+        assertThat("it should have inserted a single user: " + user, actualUser, is(equalTo(user)));
     }
 
     @Test
@@ -92,6 +103,9 @@ public class MongoInsertTest {
                                 .append("phone", "9283742"));
 
         usersCollection.insertOne(user);
+        final Document actualUser = usersCollection.find(user).first();
+
+        assertThat("it should have inserted a single user: " + user, actualUser, is(equalTo(user)));
     }
 
     @Test
@@ -110,23 +124,30 @@ public class MongoInsertTest {
         users.add(tim);
 
         usersCollection.insertMany(users);
+
+        final List<Document> actualUsers = usersCollection.find(or(alberto, john, tim)).into(new ArrayList<>());
+
+        assertThat("it should have inserted multiple users", actualUsers, hasItems(alberto, john, tim));
     }
 
     /**
      * from the book :: Be careful when using your own IDs!
      * When providing your own keys, it is entirely your responsibility to care for duplicate key issues. Generally speaking, MongoDB documents
      * can share the same keys; that's not true for the _id key, resulting in an exception if you try to insert two documents with the same _id:
+     *
      * @throws com.mongodb.MongoException$DuplicateKey
      */
     @Test
     public void shouldInsertWithId() throws Exception {
         final UUID uuid = UUID.randomUUID();
 
-        final Document user = new Document("_id", uuid.toString().replace("-",""))
+        final Document user = new Document("_id", uuid.toString().replace("-", ""))
                 .append("name", "romano")
                 .append("age", 28);
 
         usersCollection.insertOne(user);
+        final Document actualUser = usersCollection.find(user).first();
 
+        assertThat("it should have inserted a single user: " + user, actualUser, is(equalTo(user)));
     }
 }

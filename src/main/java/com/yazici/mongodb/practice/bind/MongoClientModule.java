@@ -3,6 +3,12 @@ package com.yazici.mongodb.practice.bind;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.yazici.mongodb.practice.domain.codec.UserCodec;
+import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import javax.inject.Named;
 
@@ -13,11 +19,22 @@ public class MongoClientModule extends AbstractModule {
 
 
     @Override
-    protected void configure() {}
+    protected void configure() {
+    }
 
     @Provides
     MongoClient provideMongoClient(@Named("com.yazici.mongo.host") String mongoHost,
                                    @Named("com.yazici.mongo.port") int mongoPort) {
-        return new MongoClient(mongoHost, mongoPort);
+
+        final CodecRegistry defaultCodecRegistry = MongoClient.getDefaultCodecRegistry();
+        final Codec<Document> defaultDocumentCodec = defaultCodecRegistry.get(Document.class);
+
+        final UserCodec userCodec = new UserCodec(defaultDocumentCodec);
+        final CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
+                defaultCodecRegistry, CodecRegistries.fromCodecs(userCodec)
+        );
+        final MongoClientOptions options = MongoClientOptions.builder().codecRegistry(codecRegistry)
+                .build();
+        return new MongoClient(String.format("%s:%d", mongoHost, mongoPort), options);
     }
 }
