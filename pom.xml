@@ -74,7 +74,7 @@
         <mongodb.version>3.1.1</mongodb.version>
         <junit.version>4.12</junit.version>
         <guice.version>4.0</guice.version>
-        <jackson2.version>2.6.4</jackson2.version>
+        <jackson2.version>2.9.10.1</jackson2.version>
         <slf4j.version>1.7.13</slf4j.version>
     </properties>
 </project>
